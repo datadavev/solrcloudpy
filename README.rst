@@ -18,6 +18,16 @@ As of 2016, this library is maintained by the Solrcloudpy community.
 Contributions are welcome.
 
 
+This Fork
+---------
+
+This fork of the project was made primarily to make the library compatible 
+with Python 3. This was achieved with 2to3 automatic adjustments and a little
+manual intervention.
+
+Backwards compatibility with Python 2 has not been evaluated.
+
+
 Usage
 -------
 .. code-block:: python
