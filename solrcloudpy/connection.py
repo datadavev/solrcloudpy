@@ -13,7 +13,7 @@ To get a :class:`~solrcloudpy.SolrCollection` instance from a :class:`SolrConnec
 
 
 """
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 import semver
 
@@ -66,7 +66,7 @@ class SolrConnection(object):
         self.request_retries = request_retries
         
         if not semver.match(version, MIN_SUPPORTED_VERSION) and semver.match(version, MAX_SUPPORTED_VERSION):
-            raise StandardError("Unsupported version %s" % version)
+            raise Exception("Unsupported version %s" % version)
         
         if semver.match(self.version, '<5.4.0'):
             self.zk_path = '/{webappdir}/zookeeper'.format(webappdir=self.webappdir)
@@ -149,7 +149,7 @@ class SolrConnection(object):
         params = {'wt': 'json', }
         response = self.client.get(
             ('/{webappdir}/admin/cores'.format(webappdir=self.webappdir)), params).result
-        cores = response.get('status', {}).keys()
+        cores = list(response.get('status', {}).keys())
         return cores
 
     @property
@@ -170,9 +170,9 @@ class SolrConnection(object):
             collections = self.list()
             for coll in collections:
                 shards = data[coll]['shards']
-                for shard, shard_info in shards.iteritems():
+                for shard, shard_info in list(shards.items()):
                     replicas = shard_info['replicas']
-                    for replica, info in replicas.iteritems():
+                    for replica, info in list(replicas.items()):
                         state = info['state']
                         if state != 'active':
                             item = {"collection": coll,
@@ -185,9 +185,9 @@ class SolrConnection(object):
             params = {'action': 'CLUSTERSTATUS', 'wt': 'json'}
             response = self.client.get(
                 ('/{webappdir}/admin/collections'.format(webappdir=self.webappdir)), params).result
-            for collection_name, collection in response.dict['cluster']['collections'].items():
-                for shard_name, shard in collection['shards'].items():
-                    for replica_name, replica in shard['replicas'].items():
+            for collection_name, collection in list(response.dict['cluster']['collections'].items()):
+                for shard_name, shard in list(collection['shards'].items()):
+                    for replica_name, replica in list(shard['replicas'].items()):
                         if replica['state'] != 'active':
                             item = {"collection": collection_name,
                                     "replica": replica_name,

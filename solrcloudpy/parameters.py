@@ -12,7 +12,7 @@ class BaseParams(object):
         if query:
             self._q['q'].add(query)
 
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             if hasattr(v, "__iter__"):
                 self._q[k].update(v)
             else:
@@ -24,7 +24,7 @@ class BaseParams(object):
         :return: self
         :rtype: BaseParams
         """
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             if hasattr(v, "__iter__"):
                 self._q[k].update(v)
             else:
@@ -51,7 +51,7 @@ class BaseParams(object):
         :rtype: iterable
         """
         c = self._q.copy()
-        return c.iteritems()
+        return iter(c.items())
 
     def __getitem__(self, item):
         """
@@ -67,7 +67,7 @@ class BaseParams(object):
         :return: an iterable
         :rtype: iterable
         """
-        return self._q.iterkeys()
+        return iter(self._q.keys())
 
     def __len__(self):
         """
@@ -580,12 +580,12 @@ class SearchOptions(object):
             res.update({'facet': 'true'})
         for p in self._all:
             res.update(iter(p))
-        return res.iteritems()
+        return iter(res.items())
 
     def iterkeys(self):
         res = []
         for p in self._all:
-            res += list(p.iterkeys())
+            res += list(p.keys())
         return iter(res)
 
     def __repr__(self):

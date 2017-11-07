@@ -2,7 +2,7 @@ from requests.exceptions import ConnectionError, HTTPError
 from requests.auth import HTTPBasicAuth
 
 import requests
-import urlparse
+import urllib.parse
 import json
 import random
 import logging
@@ -76,10 +76,10 @@ class _Request(object):
             resparams['async'] = async_id
 
         if hasattr(params, 'iteritems'):
-            resparams.update(params.iteritems())
+            resparams.update(iter(params.items()))
 
         retry_states = dict([(server, 0) for server in self.connection.servers])
-        servers = retry_states.keys()
+        servers = list(retry_states.keys())
 
         if not servers:
             raise SolrException("No servers available")
@@ -87,7 +87,7 @@ class _Request(object):
         result = None
         while result is None:
             host = random.choice(servers)
-            fullpath = urlparse.urljoin(host, path)
+            fullpath = urllib.parse.urljoin(host, path)
             try:
                 r = self.client.request(method, fullpath,
                                         params=resparams,
@@ -109,7 +109,7 @@ class _Request(object):
                 retry_states[host] += 1
                 if retry_states[host] > self.connection.request_retries:
                     del retry_states[host]
-                    servers = retry_states.keys()
+                    servers = list(retry_states.keys())
 
                 if len(servers) <= 0:
                     logger.error('No servers left to try')
@@ -176,9 +176,9 @@ class DictObject(object):
         if not obj:
             return
 
-        for k, v in obj.iteritems():
-            if isinstance(k, unicode):
-                k = k.encode('utf8', 'ignore')
+        for k, v in obj.items():
+            #if isinstance(k, str):
+            #    k = k.encode('utf8', 'ignore')
             if isinstance(v, dict):
                 # create a new object from this (sub)class,
                 # not necessarily from DictObject
@@ -221,7 +221,7 @@ class SolrResult(DictObject):
         :rtype: dict
         """
         res = {}
-        for (k, v) in self.__dict__.iteritems():
+        for (k, v) in self.__dict__.items():
             if isinstance(v, SolrResult):
                 res[k] = v.dict
             else:
